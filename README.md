@@ -8,7 +8,7 @@ I enjoyed creating an automated configuration that builds the infrastructure and
 
 ![Ansible Controls](./assets/ansible-controls.jpg)
 
-Due to the open ended nature and complexity of the project I find the project as a proof of ability to understand aspects of the fullstack, software development, ability to automate provisioning infrastructure and use best engineering and security practices.  However, I decided on a number of simplifications to make it in time.  Some of the simplifications obviusly don't display the best security and SRE practices, however, that is strictly due the time constraint.
+Due to the open ended nature and complexity of the project I find the project as a proof of ability to understand aspects of the fullstack, software development, ability to automate provisioning infrastructure and use best engineering and security practices.  However, I decided on a number of simplifications to make it in time.  Some of the simplifications obviously don't display the best security and SRE practices, however, that is strictly due the time constraint.
 
 To make this automation fit for production business environment a few selected simplifications would need to be improved, namely secrets management and passwords generation, performance monitoring, alerting and logs management.
 
