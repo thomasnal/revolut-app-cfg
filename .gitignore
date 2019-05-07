@@ -1,5 +1,8 @@
 /.DS_Store
 
+# Ansible files
+*.retry
+
 # Terraform files
 .terraform
 *.tfstate
