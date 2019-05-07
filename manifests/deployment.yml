@@ -1,0 +1,56 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: revolut-app
+spec:
+  replicas: 2
+  minReadySeconds: 15
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: revolut-app
+    spec:
+      containers:
+      - name: revolut-app
+        image: {{ ecr_repo_url }}:{{ version }}
+        ports:
+          - containerPort: 80
+            protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /health_check
+            port: 80
+          initialDelaySeconds: 15
+          timeoutSeconds: 15
+        env:
+        - name: POSTGRESQL_ADDRESS
+          valueFrom:
+            configMapKeyRef:
+              name: revolut-app-config
+              key: database-address
+        - name: POSTGRESQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: revolut-app-config
+              key: database-name
+        - name: POSTGRESQL_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: revolut-app-config
+              key: database-port
+        - name: POSTGRESQL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: revolut-app-secrets
+              key: database-username
+        - name: POSTGRESQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: revolut-app-secrets
+              key: database-password
+        imagePullPolicy: Always

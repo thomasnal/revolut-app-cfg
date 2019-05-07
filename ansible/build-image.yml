@@ -1,0 +1,26 @@
+---
+- name: Build app image
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_prompt:
+    - name: "version"
+      private: no
+      prompt: "Enter git tag you want to build"
+
+  tasks:
+    - name: Source infrastructure variables
+      terraform:
+        project_path: ../terraform
+        state: present
+      register: k8s
+
+    - set_fact:
+        aws_region: "{{ k8s.outputs.aws_region.value }}"
+    - set_fact:
+        code_build_project_name: "{{ k8s.outputs.code_build_project_name.value }}"
+    - name: Start code build
+      command: >
+        aws codebuild start-build --project-name {{ code_build_project_name }}
+          --region {{ aws_region }}
+          --source-version {{ version }}

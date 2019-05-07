@@ -1,0 +1,13 @@
+/.DS_Store
+
+# Terraform files
+.terraform
+*.tfstate
+*.backup
+
+
+# Vim swap files
+*.swp
+*.swn
+*.swo
+session.vis

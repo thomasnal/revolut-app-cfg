@@ -1,0 +1,51 @@
+---
+- name: Deploy app image
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_prompt:
+    - name: "version"
+      private: no
+      prompt: "Enter git tag you want to deploy"
+
+  tasks:
+    - name: Source infrastructure variables
+      terraform:
+        project_path: ../terraform
+        state: present
+      register: k8s
+
+    - set_fact:
+        ecr_repo_url: "{{ k8s.outputs.ecr_repo_url.value }}"
+    - set_fact:
+        db_address: "{{ k8s.outputs.db_address.value }}"
+    - debug:
+        msg: "{{ db_address }}"
+    - set_fact:
+        db_name: "{{ k8s.outputs.db_name.value }}"
+    - set_fact:
+        db_port: "{{ k8s.outputs.db_port.value }}"
+    - set_fact:
+        db_username: "{{ k8s.outputs.db_username.value }}"
+    - set_fact:
+        db_password: "{{ k8s.outputs.db_password.value }}"
+
+    - name: Apply configmap
+      args:
+        stdin: "{{ lookup('template', '../manifests/configmap.yml') }}"
+      command: "kubectl --kubeconfig ./kubeconfig.yml apply -f -"
+
+    - name: Apply secrets
+      args:
+        stdin: "{{ lookup('template', '../manifests/secrets.yml') }}"
+      command: "kubectl --kubeconfig ./kubeconfig.yml apply -f -"
+
+    - name: Apply deployment
+      args:
+        stdin: "{{ lookup('template', '../manifests/deployment.yml') }}"
+      command: "kubectl --kubeconfig ./kubeconfig.yml apply -f -"
+
+    - name: Apply service
+      args:
+        stdin: "{{ lookup('template', '../manifests/service.yml') }}"
+      command: "kubectl --kubeconfig ./kubeconfig.yml apply -f -"

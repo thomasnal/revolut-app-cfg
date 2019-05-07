@@ -1,0 +1,35 @@
+---
+- name: Build k8s
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  tasks:
+    - name: Provision infrastructure
+      terraform:
+        force_init: true
+        project_path: ../terraform
+        state: present
+      register: k8s
+
+    - set_fact:
+        kubeconfig_yml: "{{ k8s.outputs.kubeconfig.value }}"
+    - set_fact:
+        config_map_aws_auth: "{{ k8s.outputs.config_map_aws_auth.value }}"
+
+    - name: Check if kubeconfig exists
+      stat:
+        path: kubeconfig.yml
+      register: kubeconfig
+
+    - name: Write kubeconfig
+      local_action: copy content="{{ kubeconfig_yml }}" dest="./kubeconfig.yml"
+      when: kubeconfig.stat.exists == false
+
+    - debug:
+        msg: "{{ config_map_aws_auth }}"
+
+    - name: Configure k8s node auth
+      args:
+        stdin: "{{ config_map_aws_auth }}"
+      command: "kubectl --kubeconfig ./kubeconfig.yml apply -f -"
